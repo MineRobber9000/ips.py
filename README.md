@@ -1,4 +1,4 @@
-# ips.py
+# ips.py [![Build Status](https://travis-ci.com/MineRobber9000/ips.py.svg?branch=master)](https://travis-ci.com/MineRobber9000/ips.py)
 
 An IPS file reader lib for Python 3.
 
