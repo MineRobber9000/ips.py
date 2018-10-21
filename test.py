@@ -1,5 +1,6 @@
 import ips,ips.patch,io,linebuffer
 from colorama import init, deinit, Fore
+from sys import exit
 
 TEST_COUNT = 13
 TEST_NUM = 0
@@ -57,3 +58,6 @@ with open("test.ips","rb") as f:
 	testcond("All data == 0",all(x==0 for x in r.data),True,"Data set incorrectly")
 
 print("{:.0%} of {!s} tests passed.".format(PASSED/TEST_COUNT,TEST_COUNT))
+if PASSED<TEST_COUNT:
+	exit(1)
+exit(0)
