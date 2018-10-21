@@ -3,15 +3,16 @@ from colorama import init, deinit, Fore
 
 TEST_COUNT = 13
 TEST_NUM = 0
+PASSED = 0
 
 lb = linebuffer.LineBuffer("Testing [0/13]"+("."*20))
 
 init()
 
 def testcond(name,value,expected,errormsg="Value different than expected ({!s})"):
-	global TEST_NUM
+	global TEST_NUM,PASSED
 	TEST_NUM+=1
-	lb.set(linebuffer.pad("{} [{!s}/{!s}]".format(name,TEST_NUM,TEST_COUNT),50,"."))
+	lb.set(linebuffer.pad("[{:>2}/{!s}] {}".format(TEST_NUM,TEST_COUNT,name),50,"."))
 	lb.draw()
 	lb.draw()
 	try:
@@ -23,6 +24,7 @@ def testcond(name,value,expected,errormsg="Value different than expected ({!s})"
 		lb.pad = 0
 		return False
 	print(Fore.GREEN+"PASS"+Fore.RESET)
+	PASSED+=1
 	return True
 
 # create fake data
@@ -47,9 +49,11 @@ testcond("All data == 0",all(x==0 for x in m.data),True,"Some data non-zero")
 # Reading a file
 with open("test.ips","rb") as f:
 	d = ips.PatchFile.fromPatchFile(f)
-	assert type(d.records[0])==ips.patch.RLEModify,"Record did not dissolve correctly."
+	testcond("RLE dissolves to ips.patch.RLEModify",type(d.records[0]),ips.patch.RLEModify,"Record did not dissolve correctly. ({!s})")
 	r = d.records[0]
-	assert r.offset==0xFFDDBB,"Offset parsed incorrectly ({:03X})".format(r.offset)
-	assert r.size==0xFFFF,"Size parsed incorrectly ({:02X})".format(r.size)
-	assert len(r.data)==0xFFFF,"Data parsed incorrectly ({:02X})".format(len(r.data))
-	assert all(x==0 for x in r.data),"Data set incorrectly"
+	testcond("Offset parsed",r.offset,0xFFDDBB,"Offset parsed incorrectly ({:03X})")
+	testcond("Size parsed",r.size,0xFFFF,"Size parsed incorrectly ({:02X})")
+	testcond("Data parsed",len(r.data),0xFFFF,"Data parsed incorrectly ({:02X})")
+	testcond("All data == 0",all(x==0 for x in r.data),True,"Data set incorrectly")
+
+print("{:.0%} of {!s} tests passed.".format(PASSED/TEST_COUNT,TEST_COUNT))
