@@ -2,7 +2,7 @@ import ips,ips.patch,io,linebuffer
 from colorama import init, deinit, Fore
 from sys import exit
 
-TEST_COUNT = 13
+TEST_COUNT = 18
 TEST_NUM = 0
 PASSED = 0
 
@@ -56,6 +56,20 @@ with open("test.ips","rb") as f:
 	testcond("Size parsed",r.size,0xFFFF,"Size parsed incorrectly ({:02X})")
 	testcond("Data parsed",len(r.data),0xFFFF,"Data parsed incorrectly ({:02X})")
 	testcond("All data == 0",all(x==0 for x in r.data),True,"Data set incorrectly")
+
+# Applying a patch
+f = io.BytesIO()
+f.write(bytearray(b"PATCH"))
+f.write(bytearray([0x00,0x00,0x00,0x00,0x01,0xFF]))
+f.write(bytearray(b"EOF"))
+f.seek(0)
+d = ips.PatchFile.fromPatchFile(f)
+testcond("Record parsed",len(d.records),1)
+r = d.records[0]
+testcond("Offset parsed",r.offset,0)
+testcond("Size parsed",r.size,1)
+testcond("Data parsed",r.data,[0xFF])
+testcond("Applies correctly",d.apply([0x00,0xc3,0x50,0x01]),[0xff,0xc3,0x50,0x01])
 
 print("{:.0%} of {!s} tests passed.".format(PASSED/TEST_COUNT,TEST_COUNT))
 if PASSED<TEST_COUNT:
